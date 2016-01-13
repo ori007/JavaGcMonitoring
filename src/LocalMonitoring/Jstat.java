@@ -83,7 +83,7 @@ public class Jstat {
 //								System.out.println("O : " + gcutil.getO());
 //								System.out.println("P : " + gcutil.getP());
 								
-								LogTrace.writeScreenLog("S0 : " + gcutil.getS0() + "S1 : " + gcutil.getS1() + "E : " + gcutil.getE() +"O : " + gcutil.getO() + "P : " + gcutil.getP());
+								LogTrace.writeScreenLog("S0 : " + gcutil.getS0() + " S1 : " + gcutil.getS1() + " E : " + gcutil.getE() +" O : " + gcutil.getO() + " P : " + gcutil.getP());
 								
 								LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeap()).toString() + "%%");
 							}

@@ -32,7 +32,7 @@ public class GCUtil extends GCData {
 
 		setYGC( Long.parseLong(elements[5]));
 		setYGCT( Double.parseDouble(elements[6]));
-		setFGC( Long.parseLong(elements[7]));
+		setFGC(Long.parseLong(elements[7]));
 		setFGCT( Double.parseDouble(elements[8]));    
 		setGCT( Double.parseDouble(elements[9]));
 
