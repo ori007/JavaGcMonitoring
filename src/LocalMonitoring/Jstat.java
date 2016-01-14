@@ -23,6 +23,7 @@ import sun.tools.jstat.OutputFormatter;
 
 public class Jstat {
 	static final DecimalFormat DoubleFormat = new DecimalFormat("#.##");
+    private static long fgCount = 0;
 	
 	public static void main(String[] args) {
 
@@ -83,9 +84,12 @@ public class Jstat {
 //								System.out.println("O : " + gcutil.getO());
 //								System.out.println("P : " + gcutil.getP());
 								
-								LogTrace.writeScreenLog("S0 : " + gcutil.getS0() + " S1 : " + gcutil.getS1() + " E : " + gcutil.getE() +" O : " + gcutil.getO() + " P : " + gcutil.getP());
-								
-								LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeap()).toString() + "%%");
+								if (fgCount != gcutil.getFGC())
+								{
+									LogTrace.writeScreenLog("S0 : " + gcutil.getS0() + " S1 : " + gcutil.getS1() + " E : " + gcutil.getE() +" O : " + gcutil.getO() + " P : " + gcutil.getP());
+									LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeap()).toString() + "%%");
+								}
+								fgCount = gcutil.getFGC();
 							}
 						}
 
