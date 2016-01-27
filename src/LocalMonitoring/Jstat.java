@@ -87,7 +87,7 @@ public class Jstat {
 								if (fgCount != gcutil.getFGC())
 								{
 									LogTrace.writeScreenLog("S0 : " + gcutil.getS0() + " S1 : " + gcutil.getS1() + " E : " + gcutil.getE() +" O : " + gcutil.getO() + " P : " + gcutil.getP());
-									LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeap()).toString() + "%%");
+									LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeapUsage()).toString() + "%%");
 								}
 								fgCount = gcutil.getFGC();
 							}
@@ -119,7 +119,7 @@ public class Jstat {
 			args[3] = "1";
 			arguments = new Arguments(args);
 
-			gcutil = logSamples(arguments);
+			gcutil = logSamples(arguments,args[0]);
 			
 		}  catch (Exception e) {
 			LogTrace.writeExceptionLog(e);
@@ -128,7 +128,28 @@ public class Jstat {
 		return gcutil;
 	}
 
-	static GCUtil logSamples(Arguments arguments) {
+	public static GCUtil getGC(String pid) {
+		Arguments arguments;
+		
+		GCUtil gcutil = null;
+		try {
+			String args[] = new String[4];
+			
+			args[0] = "-gc";		
+			args[1] = pid;
+			args[2] = "1";
+			args[3] = "1";
+			arguments = new Arguments(args);
+			
+			gcutil = logSamples(arguments,args[0]);
+		}  catch (Exception e) {
+			LogTrace.writeExceptionLog(e);
+		}
+		
+		return gcutil;
+	}	
+	
+	static GCUtil logSamples(Arguments arguments,String option) {
 		final VmIdentifier vmId	= arguments.vmId();
 		int interval 			= arguments.sampleInterval();
 		GCUtil gcutil 			= null;
@@ -140,9 +161,14 @@ public class Jstat {
 	
 			OptionFormat format = arguments.optionFormat();
 			formatter = new OptionOutputFormatter(monitoredVm, format);
-				
-			gcutil = GCUtil.parse(formatter.getRow().trim());
-	
+			
+			if (option.toLowerCase() == "-gcutil") {
+				gcutil = GCUtil.parse(formatter.getRow().trim());
+			}
+			else {
+				gcutil = GCUtil.gcParse(formatter.getRow().trim());
+			}
+			
 			monitoredHost.detach(monitoredVm);
 			
 		} catch (MonitorException e) {
@@ -186,55 +212,55 @@ public class Jstat {
 	    
         return flagIsProcessId;
 	}
-	
-	public static GCUtil getJvmGCUtil(String pid) {
-	    
-	    GCUtil gcUtil = null;
-	    
-	    BufferedReader in = null;
-        try {
-            String[] arg = {"jstat", "-gcutil", pid, "1", "1"};
-            Process process = Runtime.getRuntime().exec(arg);
-
-            in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            /*
-             * ex)
-             *  JRE 1.6(1.7)
-             *  S0     S1     E      O      P     YGC     YGCT    FGC    FGCT     GCT
-             *  0.00  99.46  60.66   3.23  70.55      1    0.010     0    0.000    0.010
-             *  
-             *  JRE 1.8
-             *  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT   
-             *  0.00   0.00  15.67  86.45  93.29  83.70    187    1.484   119   32.037   33.522
-             */
-            String[] gcHeaders = null;
-            String str = in.readLine();
-            gcHeaders = str.split(" +");
-            
-            String[] gcInfos = null;
-            str = in.readLine();
-            gcInfos = str.split(" +");
-            
-            Map<String, String> gcInfoMap = new HashMap<String, String>();
-            for(int i=0; i<gcHeaders.length; i++) {
-                gcInfoMap.put(gcHeaders[i], gcInfos[i]);
-            }
-            
-            gcUtil = GCUtil.parseGcInfo(gcInfoMap);
-
-        } catch (IOException e) {
-            LogTrace.writeExceptionLog(e);
-            
-            gcUtil = null;
-        } finally {
-            if(in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {}
-            }
-        }
-        
-        return gcUtil;
-	}
+//	
+//	public static GCUtil getJvmGCUtil(String pid) {
+//	    
+//	    GCUtil gcUtil = null;
+//	    
+//	    BufferedReader in = null;
+//        try {
+//            String[] arg = {"jstat", "-gcutil", pid, "1", "1"};
+//            Process process = Runtime.getRuntime().exec(arg);
+//
+//            in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//
+//            /*
+//             * ex)
+//             *  JRE 1.6(1.7)
+//             *  S0     S1     E      O      P     YGC     YGCT    FGC    FGCT     GCT
+//             *  0.00  99.46  60.66   3.23  70.55      1    0.010     0    0.000    0.010
+//             *  
+//             *  JRE 1.8
+//             *  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT   
+//             *  0.00   0.00  15.67  86.45  93.29  83.70    187    1.484   119   32.037   33.522
+//             */
+//            String[] gcHeaders = null;
+//            String str = in.readLine();
+//            gcHeaders = str.split(" +");
+//            
+//            String[] gcInfos = null;
+//            str = in.readLine();
+//            gcInfos = str.split(" +");
+//            
+//            Map<String, String> gcInfoMap = new HashMap<String, String>();
+//            for(int i=0; i<gcHeaders.length; i++) {
+//                gcInfoMap.put(gcHeaders[i], gcInfos[i]);
+//            }
+//            
+//            gcUtil = GCUtil.parseGcInfo(gcInfoMap);
+//
+//        } catch (IOException e) {
+//            LogTrace.writeExceptionLog(e);
+//            
+//            gcUtil = null;
+//        } finally {
+//            if(in != null) {
+//                try {
+//                    in.close();
+//                } catch (IOException e) {}
+//            }
+//        }
+//        
+//        return gcUtil;
+//	}
 }
