@@ -90,6 +90,7 @@ public class GCUtil extends GCData {
 	    setHeapUsage(summaryHeap);
 	}
 	
+	
 	private Double usagePersent(Double size, Double usage){
 		double ret = 0;
 		

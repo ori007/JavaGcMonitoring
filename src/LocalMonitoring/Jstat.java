@@ -73,7 +73,7 @@ public class Jstat {
 						
 						if (null != this.PID){
 							
-							GCUtil gcutil = Jstat.getGCUtil(this.PID);
+							GCUtil gcutil = Jstat.getGC(this.PID);
 							if (gcutil != null) {
 //								System.out.println("FGC : " + gcutil.getFGC());
 //								System.out.println("FGT : " + gcutil.getFGCT());
@@ -87,7 +87,21 @@ public class Jstat {
 								if (fgCount != gcutil.getFGC())
 								{
 									LogTrace.writeScreenLog("S0 : " + gcutil.getS0() + " S1 : " + gcutil.getS1() + " E : " + gcutil.getE() +" O : " + gcutil.getO() + " P : " + gcutil.getP());
-									LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeapUsage()).toString() + "%%");
+									LogTrace.writeScreenLog("Heap Usage : " + DoubleFormat.format(gcutil.getHeapUsage()).toString() + "%");
+								}
+								else
+								{
+									// sumUsage / sumCapacity * 100.0;
+									String s0Size = byteCalculation(gcutil.getS0U()) + " / " + byteCalculation(gcutil.getS0C());
+									String s1Size = byteCalculation(gcutil.getS1U()) + " / " + byteCalculation(gcutil.getS1C());
+									String eSize = byteCalculation(gcutil.getEU()) + " / " + byteCalculation(gcutil.getEC());
+									String oSize = byteCalculation(gcutil.getOU()) + " / " + byteCalculation(gcutil.getOC());
+									String pSize = byteCalculation(gcutil.getPU()) + " / " + byteCalculation(gcutil.getPC());
+									LogTrace.writeScreenLog("S0 : " + s0Size +" (" + gcutil.getS0() + "%) " 
+																	+ "S1 : " + s1Size +" (" + gcutil.getS1() + "%) " 
+																	+ " E : " + eSize +" (" + gcutil.getE() + "%) " 
+																	+ " O : " + oSize +" (" + gcutil.getO() + "%) "  
+																	+ " P : " + pSize +" (" + gcutil.getP() + "%) ");
 								}
 								fgCount = gcutil.getFGC();
 							}
@@ -106,6 +120,20 @@ public class Jstat {
 			}
 		}
 	}
+	  public static String byteCalculation(double bytes) {
+          String retFormat = "0";
+          String[] s = {"KB", "MB", "GB", "TB", "PB" };
+         
+          if (bytes != 0) {
+                int idx = (int) Math.floor(Math.log(bytes) / Math.log(1024));
+                DecimalFormat df = new DecimalFormat("#,###.###");
+                double ret = ((bytes / Math.pow(1024, Math.floor(idx))));
+                retFormat = df.format(ret) + " " + s[idx];
+           } else {
+                retFormat += " " + s[0];
+           }
+           return retFormat;
+}
 	
 	public static GCUtil getGCUtil(String pid) {
 		Arguments arguments;
@@ -113,7 +141,7 @@ public class Jstat {
 		GCUtil gcutil = null;
 		try {
 			String args[] = new String[4];
-			args[0] = "-gcutil";
+			args[0] = "-gc";
 			args[1] = pid;
 			args[2] = "100";
 			args[3] = "1";
